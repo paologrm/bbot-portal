@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B&Bot — Pannello Gestore</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">B&Bot</div>
+    <div class="login-sub">Pannello di gestione concierge</div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="marco@casadegliulivi.it">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••">
+    </div>
+    <div id="login-error" class="error-msg" style="display:none"></div>
+    <button class="btn btn-primary" id="login-btn">Accedi</button>
+  </div>
+</div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      B&Bot
+      <span id="property-name-sidebar">—</span>
+    </div>
+    <nav>
+      <div class="nav-item active" data-page="struttura">
+        <span class="nav-icon">🏠</span> Struttura
+      </div>
+      <div class="nav-item" data-page="tips">
+        <span class="nav-icon">📍</span> Tips locali
+      </div>
+      <div class="nav-item" data-page="ospiti">
+        <span class="nav-icon">👥</span> Ospiti
+      </div>
+      <div class="nav-item" data-page="chat">
+        <span class="nav-icon">💬</span> Chat
+      </div>
+      <div class="nav-item" data-page="impostazioni">
+        <span class="nav-icon">⚙️</span> Impostazioni
+      </div>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <div id="page-struttura" class="page active">
+      <div class="page-header">
+        <div class="page-title">Informazioni struttura</div>
+        <div class="page-sub">Queste info vengono usate da Olivia per rispondere agli ospiti</div>
+      </div>
+      <div class="card">
+        <div class="card-title">📶 Connettività</div>
+        <div class="grid-2">
+          <div class="form-group"><label>Nome rete WiFi</label><input type="text" id="wifi_name" placeholder="CasaUlivi_5G"></div>
+          <div class="form-group"><label>Password WiFi</label><input type="text" id="wifi_password" placeholder="ulivi2024"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🕐 Orari</div>
+        <div class="grid-2">
+          <div class="form-group"><label>Check-in</label><input type="text" id="checkin_time" placeholder="15:00 - 20:00"></div>
+          <div class="form-group"><label>Check-out</label><input type="text" id="checkout_time" placeholder="Entro le 11:00"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🚗 Mobilità</div>
+        <div class="form-group"><label>Parcheggio</label><input type="text" id="parking" placeholder="Cortile gratuito"></div>
+        <div class="form-group"><label>Trasporto pubblico</label><textarea id="transport" placeholder="Funicolare €1.30 ogni 10 min&#10;Taxi: 0763 301903"></textarea></div>
+        <div class="form-group"><label>Noleggio biciclette e simili</label><textarea id="bike_rental" placeholder="Noleggio bici: Via Roma 5, aperto 9-18"></textarea></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏡 Casa</div>
+        <div class="form-group"><label>Riscaldamento e Aria condizionata</label><textarea id="heating_ac" placeholder="Termostato nel corridoio, impostare tra 19-22°C"></textarea></div>
+        <div class="form-group"><label>Raccolta differenziata</label><textarea id="garbage" placeholder="Lunedì: plastica&#10;Mercoledì: umido&#10;Venerdì: carta"></textarea></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🆘 Emergenze</div>
+        <div class="form-group"><label>Telefono emergenze</label><input type="text" id="emergency_phone" placeholder="+39 333 456 7890 (Marco)"></div>
+      </div>
+      <div class="save-bar">
+        <button class="btn btn-primary btn-sm" id="save-struttura">💾 Salva informazioni</button>
+      </div>
+    </div>
+
+    <div id="page-tips" class="page">
+      <div class="page-header">
+        <div class="page-title">Tips locali</div>
+        <div class="page-sub">Consigli personali che Olivia userà per rispondere agli ospiti</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🍽️ Ristoranti &amp; Bar</div>
+        <div id="restaurants-list"></div>
+        <div class="add-form">
+          <div class="grid-2">
+            <div class="form-group"><label>Nome</label><input type="text" id="rest-name" placeholder="Trattoria del Moro"></div>
+            <div class="form-group"><label>Tipo</label><input type="text" id="rest-type" placeholder="Ristorante, Bar..."></div>
+          </div>
+          <div class="form-group"><label>Descrizione</label><textarea id="rest-desc" placeholder="Strangozzi al tartufo, chiuso martedì, 25-35€..." style="min-height:70px"></textarea></div>
+          <button class="btn btn-secondary btn-sm" id="add-restaurant">+ Aggiungi</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏛️ Monumenti &amp; Attrazioni</div>
+        <div id="monuments-list"></div>
+        <div class="add-form">
+          <div class="grid-2">
+            <div class="form-group"><label>Nome</label><input type="text" id="mon-name" placeholder="Duomo di Orvieto"></div>
+            <div class="form-group"><label>Categoria</label><input type="text" id="mon-cat" placeholder="Arte, Natura, Storia..."></div>
+          </div>
+          <div class="form-group"><label>Descrizione</label><textarea id="mon-desc" placeholder="Cappella di San Brizio, €5..." style="min-height:70px"></textarea></div>
+          <button class="btn btn-secondary btn-sm" id="add-monument">+ Aggiungi</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔗 URL informative</div>
+        <div id="urls-list"></div>
+        <div class="add-form">
+          <div class="grid-2">
+            <div class="form-group"><label>Nome</label><input type="text" id="url-name" placeholder="Sito turismo Orvieto"></div>
+            <div class="form-group"><label>URL</label><input type="url" id="url-url" placeholder="https://..."></div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="add-url">+ Aggiungi</button>
+        </div>
+      </div>
+      <div class="save-bar">
+        <button class="btn btn-primary btn-sm" id="save-tips">💾 Salva tips</button>
+      </div>
+    </div>
+
+    <div id="page-ospiti" class="page">
+      <div class="page-header">
+        <div class="page-title">Ospiti</div>
+        <div class="page-sub">Gestione prenotazioni e attivazione bot</div>
+      </div>
+      <div class="card">
+        <table class="guests-table">
+          <thead>
+            <tr>
+              <th>Nome</th><th>Stanza</th><th>Check-in</th><th>Check-out</th><th>Canale</th><th>Stato</th>
+            </tr>
+          </thead>
+          <tbody id="guests-tbody">
+            <tr><td colspan="6" style="color:var(--text3);text-align:center;padding:32px">Caricamento...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="page-chat" class="page">
+      <div class="page-header">
+        <div class="page-title">Chat ospiti</div>
+        <div class="page-sub">Storico conversazioni con Olivia</div>
+      </div>
+      <div class="chat-layout card" style="padding:0;overflow:hidden">
+        <div class="chat-list" id="chat-list">
+          <div style="padding:20px;color:var(--text3);font-size:0.85rem">Caricamento...</div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div style="margin:auto;color:var(--text3);text-align:center">
+            <div style="font-size:2rem;margin-bottom:8px">💬</div>
+            Seleziona un ospite per vedere la chat
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-impostazioni" class="page">
+      <div class="page-header">
+        <div class="page-title">Impostazioni</div>
+        <div class="page-sub">Configurazione bot e canali</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🤖 Attivazione anticipata bot</div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <strong>Abilita bot prima dell'arrivo</strong>
+            <small>L'ospite può chattare con Olivia già prima del check-in</small>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="early-bot-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="early-bot-days" style="margin-top:16px;display:none">
+          <label>Giorni prima del check-in</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+            <input type="number" id="bot_active_days_before" min="1" max="30" value="15" style="width:80px">
+            <span style="color:var(--text2);font-size:0.9rem">giorni prima del check-in</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📱 Canali attivi</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><strong>Telegram</strong><small id="tg-chat-id-label">—</small></div>
+          <label class="toggle"><input type="checkbox" checked disabled><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><strong>WhatsApp</strong><small id="wa-number-label">Non configurato</small></div>
+          <label class="toggle"><input type="checkbox" id="wa-toggle" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">👤 Account</div>
+        <div style="color:var(--text2);font-size:0.9rem;margin-bottom:16px" id="account-email">—</div>
+        <button class="btn btn-secondary btn-sm" id="logout-btn">Esci</button>
+      </div>
+      <div class="save-bar">
+        <button class="btn btn-primary btn-sm" id="save-impostazioni">💾 Salva impostazioni</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
